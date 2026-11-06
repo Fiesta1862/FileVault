@@ -1,4 +1,0 @@
-# Copy to local.properties and fill in your Supabase project values.
-# Do not commit local.properties.
-SUPABASE_URL=https://YOUR_PROJECT.supabase.co
-SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
