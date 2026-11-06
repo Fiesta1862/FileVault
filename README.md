@@ -1,12 +1,17 @@
 # FileVault
 
-A native Android private-file vault with encrypted local storage and optional encrypted cloud backup.
+A native Android private-file vault with encrypted local storage and optional encrypted cloud backup. The interface uses a dark, iOS-inspired card layout.
 
-## Stack
-- Kotlin + Jetpack Compose
-- Android Storage Access Framework for importing files
-- AES-256-GCM file encryption with keys protected by Android Keystore
-- Supabase Auth + private Storage bucket for encrypted cloud backups
+## Included in this first build
+- Kotlin + Jetpack Compose Android application
+- Import files using Android's system file picker
+- AES-256-GCM encryption before writing imported files to app-private storage
+- AES key generated and held by Android Keystore
+- Create folders, browse folders, and search file names
+- Text/JSON/XML preview; export other file types through Android's system save picker
+- Supabase email/password sign-in and encrypted cloud upload
+- Private Supabase Storage bucket with per-user folder policies
+- GitHub Actions workflow to build a debug APK
 
 ## Requirements
 - Android Studio (current stable)
@@ -17,22 +22,23 @@ A native Android private-file vault with encrypted local storage and optional en
 ## Configure Supabase
 1. Create a Supabase project.
 2. Create a **private** Storage bucket named `filevault`.
-3. In Android Studio, copy `local.properties.example` to `local.properties` and set:
-   - `SUPABASE_URL`
-   - `SUPABASE_ANON_KEY`
-4. Never put a service-role key in the Android app.
-5. Apply the Storage policies in `supabase/storage-policies.sql`.
+3. Copy `local.properties.example` to `local.properties` in the project root.
+4. Set `SUPABASE_URL` and `SUPABASE_ANON_KEY` in `local.properties`.
+5. Apply the SQL in `supabase/storage-policies.sql`.
+6. Never put a Supabase service-role key in the Android app.
 
-Cloud backups are encrypted on the device before upload. The encryption key is held in that device's Android Keystore and is not uploaded. This first version therefore supports restoring backups on the same device; cross-device recovery/key transfer is not implemented.
+Cloud uploads contain encrypted file bytes only. Cloud upload is implemented; cloud browsing, restore, and cross-device key recovery are not included yet. The encryption key is device-local and is not uploaded.
 
-## Build
-Open this repository in Android Studio, allow Gradle sync, then run the `app` configuration on an Android device or emulator (Android 8.0+).
+## Build locally
+Open the repository in Android Studio, allow Gradle sync, then run the `app` configuration on an Android device or emulator (Android 8.0+).
 
-For an APK: **Build → Build Bundle(s) / APK(s) → Build APK(s)**.
+To build an APK in Android Studio: **Build → Build Bundle(s) / APK(s) → Build APK(s)**.
 
-## Security notes
-- Imported files are encrypted before being written to app-private storage.
-- Original files remain in their original location unless you delete them yourself.
-- Cloud uploads contain ciphertext only.
-- The app uses a per-install Android Keystore key. Clearing app data or uninstalling may make local encrypted files and cloud backups unrecoverable. Export/recovery-key support should be added before relying on this for irreplaceable data.
-- This is an initial project; review and test security and backup recovery before storing sensitive or important files.
+A GitHub Actions workflow is included at `.github/workflows/android.yml`. After it completes, download the `FileVault-debug-apk` artifact from the workflow run.
+
+## Important security limitations
+- Original source files remain where they were; importing creates an encrypted copy in FileVault.
+- File names and basic index metadata are stored in the app-private sandbox; file contents are encrypted.
+- The app uses a per-install Android Keystore key. Clearing app data, uninstalling, or losing the device can make local files and uploaded cloud copies unrecoverable.
+- There is no recovery-key export or cloud restore in this initial build. Do not use it as the only copy of important files.
+- This is an initial implementation, not a security-audited product. Test it with non-sensitive sample files first.
